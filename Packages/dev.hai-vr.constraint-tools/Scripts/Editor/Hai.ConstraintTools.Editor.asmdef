@@ -1,0 +1,35 @@
+{
+    "name": "Hai.ConstraintTools.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Hai.ConstraintTools.Runtime",
+        "VRC.SDK3A",
+        "VRC.SDK3A.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "VRCSDK3A.dll",
+        "VRC.SDK3.Dynamics.Constraint.dll",
+        "VRC.Dynamics.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.vrchat.avatars",
+            "expression": "",
+            "define": "CONSTRAINTTOOLS_VRCHAT_IS_INSTALLED"
+        },
+        {
+            "name": "com.vrchat.avatars",
+            "expression": "3.7.3",
+            "define": "CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED"
+        }
+    ],
+    "noEngineReferences": false
+}

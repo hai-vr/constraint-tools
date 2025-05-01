@@ -1,0 +1,24 @@
+{
+	"name": "Hai.ConstraintTools.Runtime",
+	"references": [
+		"VRC.SDKBase"
+	],
+	"includePlatforms": [],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [
+		"VRCSDKBase.dll",
+		"VRCSDKBase-Editor.dll"
+	],
+	"autoReferenced": true,
+	"defineConstraints": [],
+	"versionDefines": [
+		{
+			"name": "com.vrchat.avatars",
+			"expression": "",
+			"define": "CONSTRAINTTOOLS_VRCHAT_IS_INSTALLED"
+		}
+	],
+	"noEngineReferences": false
+}
