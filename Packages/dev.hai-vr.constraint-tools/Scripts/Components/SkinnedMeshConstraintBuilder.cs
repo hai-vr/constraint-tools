@@ -8,7 +8,7 @@ namespace Hai.ConstraintTools.Runtime
         , VRC.SDKBase.IEditorOnly
     #endif
     {
-        public SkinnedMeshRenderer renderer;
+        public SkinnedMeshRenderer sourceMesh;
         public SkinnedMeshConstraintBindMethod bindMethod;
         public SkinnedMeshConstraintVendor vendor;
         public Vector3 samplerOffset = Vector3.zero;

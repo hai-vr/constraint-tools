@@ -48,11 +48,11 @@ namespace Hai.ConstraintTools.Editor
             if (parentConstraintNullable == null) parentConstraintNullable = smc.GetComponent<VRCParentConstraint>();
 #endif
             
-            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.renderer)));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.sourceMesh)));
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.bindMethod)));
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.samplerOffset)));
             
-            EditorGUI.BeginDisabledGroup(my.renderer == null);
+            EditorGUI.BeginDisabledGroup(my.sourceMesh == null);
             if (GUILayout.Button(parentConstraintNullable == null ? CreateParentConstraintLabel : UpdateParentConstraintLabel))
             {
                 if (parentConstraintNullable == null)
@@ -210,7 +210,7 @@ namespace Hai.ConstraintTools.Editor
         private void ResolveConstraintConfiguration(SkinnedMeshConstraintBuilder my, Component constraint)
         {
             var bakeMesh = new Mesh();
-            var renderer = my.renderer;
+            var renderer = my.sourceMesh;
             
             // We're going to bake the mesh to make space conversions simpler
             // (i.e. if an A-posed avatar is being T-posed in editor then it should still work),
