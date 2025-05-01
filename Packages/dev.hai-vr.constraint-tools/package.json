@@ -12,6 +12,6 @@
   },
   "url" : "https://docs.hai-vr.dev/docs/products/constraint-tools/skinned-mesh-constraint",
   "documentationUrl": "https://docs.hai-vr.dev/docs/products/constraint-tools/skinned-mesh-constraint",
-  "changelogUrl": "https://docs.hai-vr.dev/docs/changelogs/constraint-tools/skinned-mesh-constraint",
+  "changelogUrl": "https://docs.hai-vr.dev/docs/changelogs/constraint-tools",
   "license": "MIT"
 }
