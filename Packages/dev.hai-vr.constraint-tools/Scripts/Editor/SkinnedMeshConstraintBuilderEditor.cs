@@ -256,7 +256,7 @@ namespace Hai.ConstraintTools.Editor
                 // In other words, do not replace the code below with invoking the stock ActivateAndPreserveOffset function.
                 var sources = new List<ConstraintSource>();
                 unityConstraint.GetSources(sources);
-                unityConstraint.translationOffsets = sources.Select(source => source.sourceTransform == null ? Vector3.zero : source.sourceTransform.InverseTransformPoint(referenceTransform.position)).ToArray();
+                unityConstraint.translationOffsets = sources.Select(source => source.sourceTransform == null ? Vector3.zero : CalculateTranslationOffset(source.sourceTransform, referenceTransform)).ToArray();
                 unityConstraint.rotationOffsets = sources.Select(source => source.sourceTransform == null ? Quaternion.identity.eulerAngles : (Quaternion.Inverse(source.sourceTransform.rotation) * referenceTransform.rotation).eulerAngles).ToArray();
 
                 unityConstraint.translationAtRest = my.transform.localPosition;
@@ -283,7 +283,7 @@ namespace Hai.ConstraintTools.Editor
                         {
                             Weight = boneIndexToWeight.Value / summedWeights,
                             SourceTransform = sourceTransform,
-                            ParentPositionOffset = sourceTransform.InverseTransformPoint(referenceTransform.position),
+                            ParentPositionOffset = CalculateTranslationOffset(sourceTransform, referenceTransform),
                             ParentRotationOffset = (Quaternion.Inverse(sourceTransform.rotation) * referenceTransform.rotation).eulerAngles
                         };
                         i++;
@@ -299,6 +299,16 @@ namespace Hai.ConstraintTools.Editor
 #endif
 
             Object.DestroyImmediate(bakeMesh);
+        }
+
+        private static Vector3 CalculateTranslationOffset(Transform sourceTransform, Transform referenceTransform)
+        {
+            // snippet from: https://discussions.unity.com/t/how-to-activate-parent-constraint-via-api-the-same-way-as-activate-button-does/218717/4
+            var inverse = Matrix4x4.TRS(sourceTransform.position, sourceTransform.rotation, new Vector3(1,1,1)).inverse;
+            return inverse.MultiplyPoint3x4(referenceTransform.position);
+            
+            // Was previously:
+            // return sourceTransform.InverseTransformPoint(referenceTransform.position);
         }
 
         private static Dictionary<int, float> UsingBarycentricCoordinates(Mesh bakeMesh, Vector3 samplePointInMeshSpace, SkinnedMeshRenderer renderer)
