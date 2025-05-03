@@ -23,10 +23,11 @@ namespace Hai.ConstraintTools.Editor
         private const string RemoveSkinnedMeshConstraintBuilderLabel = "Remove Skinned Mesh Constraint Builder";
         private const string SamplerOffsetLabel = "Sampler Offset";
         private const string UpdateOffsetLabel = "Update Skinned Mesh Constraint offset";
-
-        private const bool DrawMatch = true;
         private const string MsgNotEnoughBones = "This constraint only has one bone. You should parent to that bone instead, or use a bone proxy.";
         private const string ApplySkinnedMeshConstraintLabel = "Apply Skinned Mesh Constraint";
+        private const string ActivateWithSkinnedOffsetsLabel = "Activate with Skinned Offsets";
+
+        private const bool DrawMatch = true;
 
         public static GUIStyle RedText;
         public static GUIStyle BlueText;
@@ -250,14 +251,21 @@ namespace Hai.ConstraintTools.Editor
                     }
                 }
             
-                // The Activate button does not appear to calculate the offsets in the same way as we're doing below.
-                // We're trying to avoid an issue with the Activate button where calculated offsets somehow doesn't
-                // match the behaviour of mesh skinning.
+                // The default Activate button does not calculate the offsets in the same way as how we're doing below.
+                // We're avoiding an issue with the Activate button where calculated offsets will not match the behaviour of mesh skinning.
+                //   (The Activate button ensures that the position and rotation of the constraint in the reference frame of any
+                //   given sourceTransform will be the same, if that sourceTransform were to given 100% of the weight.
+                //   Hence, it virtually changes the parent because the local position and local rotation of the constraint would be
+                //   the same of that constraint was re-parented for real to that sourceTransform.
+                //   These offsets mean that the Activate button does **not** try to ensure that the constraint is located at a
+                //   proportion of the sources weight distribution towards the position of the constraint relative to each of those
+                //   sourceTransform at the time of initialization, which is roughly what mesh skinning does.)
                 // In other words, do not replace the code below with invoking the stock ActivateAndPreserveOffset function.
+                // For more information, please read: https://docs.hai-vr.dev/docs/research/other/constraint-activate
                 var sources = new List<ConstraintSource>();
                 unityConstraint.GetSources(sources);
-                unityConstraint.translationOffsets = sources.Select(source => source.sourceTransform == null ? Vector3.zero : CalculateTranslationOffset(source.sourceTransform, referenceTransform)).ToArray();
-                unityConstraint.rotationOffsets = sources.Select(source => source.sourceTransform == null ? Quaternion.identity.eulerAngles : (Quaternion.Inverse(source.sourceTransform.rotation) * referenceTransform.rotation).eulerAngles).ToArray();
+                unityConstraint.translationOffsets = UnityTranslationOffsets(sources, referenceTransform);
+                unityConstraint.rotationOffsets = UnityRotationOffsets(sources, referenceTransform);
 
                 unityConstraint.translationAtRest = my.transform.localPosition;
                 unityConstraint.rotationAtRest = my.transform.localRotation.eulerAngles;
@@ -271,6 +279,11 @@ namespace Hai.ConstraintTools.Editor
                 vrcConstraint.IsActive = false;
                 vrcConstraint.Locked = false;
                 vrcConstraint.Sources.SetLength(boneToWeight.Count);
+                
+                // For the same reason as Unity Parent Constraint, read the long comment on the block above
+                // about why the Activate button should not be used here.
+                // Do not replace the code below with invoking VRCParentConstraint.ActivateConstraint().
+                // For more information, please read: https://docs.hai-vr.dev/docs/research/other/constraint-activate
 
                 var i = 0;
                 foreach (var boneIndexToWeight in boneToWeight)
@@ -299,6 +312,20 @@ namespace Hai.ConstraintTools.Editor
 #endif
 
             Object.DestroyImmediate(bakeMesh);
+        }
+
+        private static Vector3[] UnityTranslationOffsets(List<ConstraintSource> sources, Transform referenceTransform)
+        {
+            return sources
+                .Select(source => source.sourceTransform == null ? Vector3.zero : CalculateTranslationOffset(source.sourceTransform, referenceTransform))
+                .ToArray();
+        }
+
+        private static Vector3[] UnityRotationOffsets(List<ConstraintSource> sources, Transform referenceTransform)
+        {
+            return sources
+                .Select(source => source.sourceTransform == null ? Quaternion.identity.eulerAngles : (Quaternion.Inverse(source.sourceTransform.rotation) * referenceTransform.rotation).eulerAngles)
+                .ToArray();
         }
 
         private static Vector3 CalculateTranslationOffset(Transform sourceTransform, Transform referenceTransform)
@@ -536,5 +563,66 @@ namespace Hai.ConstraintTools.Editor
 
             return boneWeight1s;
         }
+
+        [MenuItem("CONTEXT/ParentConstraint/Haï Activate with Skinned Offsets")]
+        public static void SkinParentConstraint(MenuCommand command)
+        {
+            var unityConstraint = (ParentConstraint)command.context;
+            
+            var sources = new List<ConstraintSource>();
+            unityConstraint.GetSources(sources);
+            if (sources.Any(source => source.sourceTransform == null))
+            {
+                return;
+            }
+
+            var referenceTransform = unityConstraint.transform;
+            
+            Undo.RecordObject(unityConstraint, ActivateWithSkinnedOffsetsLabel);
+            unityConstraint.constraintActive = false;
+            unityConstraint.locked = false;
+            
+            unityConstraint.translationOffsets = UnityTranslationOffsets(sources, referenceTransform);
+            unityConstraint.rotationOffsets = UnityRotationOffsets(sources, referenceTransform);
+            
+            unityConstraint.translationAtRest = referenceTransform.localPosition;
+            unityConstraint.rotationAtRest = referenceTransform.localRotation.eulerAngles;
+            
+            unityConstraint.locked = true;
+            unityConstraint.constraintActive = true;
+        }
+
+#if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
+        [MenuItem("CONTEXT/VRCParentConstraint/Haï Activate with Skinned Offsets")]
+        public static void SkinVRCParentConstraint(MenuCommand command)
+        {
+            var vrcConstraint = (VRCParentConstraint)command.context;
+            
+            if (vrcConstraint.Sources.Any(source => source.SourceTransform == null))
+            {
+                return;
+            }
+
+            var referenceTransform = vrcConstraint.transform;
+            
+            Undo.RecordObject(vrcConstraint, ActivateWithSkinnedOffsetsLabel);
+            vrcConstraint.IsActive = false;
+            vrcConstraint.Locked = false;
+
+            for (var i = 0; i < vrcConstraint.Sources.Count; i++)
+            {
+                var source = vrcConstraint.Sources[i];
+                source.ParentPositionOffset = CalculateTranslationOffset(source.SourceTransform, referenceTransform);
+                source.ParentRotationOffset = (Quaternion.Inverse(source.SourceTransform.rotation) * referenceTransform.rotation).eulerAngles;
+                vrcConstraint.Sources[i] = source;
+            }
+                
+            vrcConstraint.PositionAtRest = referenceTransform.localPosition;
+            vrcConstraint.RotationAtRest = referenceTransform.localRotation.eulerAngles;
+            
+            vrcConstraint.Locked = true;
+            vrcConstraint.IsActive = true;
+        }
+#endif
     }
 }
