@@ -3,6 +3,7 @@ using UnityEngine;
 namespace Hai.ConstraintTools.Runtime
 {
     [AddComponentMenu("Haï/Skinned Mesh Constraint Builder")]
+    [HelpURL("https://docs.hai-vr.dev/redirect/components/SkinnedMeshConstraintBuilder")]
     public class SkinnedMeshConstraintBuilder : MonoBehaviour
     #if CONSTRAINTTOOLS_VRCHAT_IS_INSTALLED
         , VRC.SDKBase.IEditorOnly
