@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using Hai.ConstraintTools.Runtime;
 using UnityEditor;
-using UnityEngine;
 
 namespace Hai.ConstraintTools.Editor
 {
@@ -17,23 +15,8 @@ namespace Hai.ConstraintTools.Editor
         {
             // GizmoUtility.SetIconEnabled does not appear to exist in Unity 2021
 #if UNITY_2022_1_OR_NEWER
-            var allConstraintToolsTypes = FindAllConstraintToolsMonoTypes();
-            foreach (var prefabulousType in allConstraintToolsTypes)
-            {
-                GizmoUtility.SetIconEnabled(prefabulousType, false);
-            }
+            GizmoUtility.SetIconEnabled(typeof(SkinnedMeshConstraintBuilder), false);
 #endif
-        }
-
-        private static Type[] FindAllConstraintToolsMonoTypes()
-        {
-            var allConstraintToolsTypes = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes())
-                .Where(type => typeof(MonoBehaviour).IsAssignableFrom(type))
-                .Where(type => type.FullName.StartsWith("Hai.ConstraintTools.Runtime."))
-                .ToArray();
-            return allConstraintToolsTypes;
         }
     }
 }
