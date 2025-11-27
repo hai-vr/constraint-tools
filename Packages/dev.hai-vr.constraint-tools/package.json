@@ -1,7 +1,7 @@
 {
   "name": "dev.hai-vr.constraint-tools",
   "displayName": "Haï ~ Skinned Mesh Constraint",
-  "version": "1.2.0-beta.1",
+  "version": "1.2.0",
   "unity": "2019.4",
   "description": "Constraint a GameObject onto a mesh polygon https://docs.hai-vr.dev/docs/products/constraint-tools/skinned-mesh-constraint",
   "author" : {
