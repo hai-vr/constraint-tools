@@ -29,6 +29,11 @@
             "name": "com.vrchat.avatars",
             "expression": "3.7.3",
             "define": "CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED"
+        },
+        {
+            "name": "com.vrchat.avatars",
+            "expression": "3.10.0",
+            "define": "CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_IS_SDK_3_10_0_OR_NEWER"
         }
     ],
     "noEngineReferences": false

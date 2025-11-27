@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using Object = UnityEngine.Object;
 #if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
+using System.Reflection;
 using VRC.Dynamics;
 using VRC.SDK3.Dynamics.Constraint.Components;
 #endif
@@ -178,7 +179,12 @@ namespace Hai.ConstraintTools.Editor
 #if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
             else if (parentConstraint is VRCParentConstraint vrcConstraint)
             {
+                // GetPerSourcePositionOffsets is not the same as vrcConstraint.Sources.ParentPositionOffset
+#if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_IS_SDK_3_10_0_OR_NEWER
+                var perSourcePositionOffsets = (Vector3[])typeof(VRCConstraintBase).GetMethod("GetPerSourcePositionOffsets", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(vrcConstraint, null);
+#else
                 var perSourcePositionOffsets = vrcConstraint.GetPerSourcePositionOffsets(); // Not the same as vrcConstraint.Sources.ParentPositionOffset
+#endif
                 var sources = vrcConstraint.Sources;
                 for (var i = 0; i < vrcConstraint.Sources.Count; i++)
                 {
