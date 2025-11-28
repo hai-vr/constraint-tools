@@ -179,10 +179,7 @@ namespace Hai.ConstraintTools.Editor
 #if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
             else if (parentConstraint is VRCParentConstraint vrcConstraint)
             {
-                // GetPerSourcePositionOffsets is not the same as vrcConstraint.Sources.ParentPositionOffset
-#if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_IS_SDK_3_10_0_OR_NEWER
-                var perSourcePositionOffsets = (Vector3[])typeof(VRCConstraintBase).GetMethod("GetPerSourcePositionOffsets", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(vrcConstraint, null);
-#else
+#if !CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_IS_SDK_3_10_0_OR_NEWER
                 var perSourcePositionOffsets = vrcConstraint.GetPerSourcePositionOffsets(); // Not the same as vrcConstraint.Sources.ParentPositionOffset
 #endif
                 var sources = vrcConstraint.Sources;
@@ -191,7 +188,11 @@ namespace Hai.ConstraintTools.Editor
                     var source = sources.ElementAt(i);
                     if (source.SourceTransform != null)
                     {
+#if !CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_IS_SDK_3_10_0_OR_NEWER
                         var offset = perSourcePositionOffsets[i];
+#else
+                        var offset = source.ParentPositionOffset;
+#endif
                         DrawFor(my.transform.position, source.SourceTransform.TransformPoint(offset), source.SourceTransform, source.Weight);
                     }
                 }
