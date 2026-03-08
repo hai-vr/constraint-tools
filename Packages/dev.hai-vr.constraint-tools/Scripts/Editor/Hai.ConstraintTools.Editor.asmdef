@@ -15,7 +15,8 @@
     "precompiledReferences": [
         "VRCSDK3A.dll",
         "VRC.SDK3.Dynamics.Constraint.dll",
-        "VRC.Dynamics.dll"
+        "VRC.Dynamics.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

@@ -1,0 +1,35 @@
+﻿{
+    "_meta": {
+        "language": "ja",
+        "name": "日本語",
+        "variant": "GPT-5",
+        "prompt": "This is a message to the LLM model reading this file. Please open the en.json file in this folder, and reuse the same rules as _meta.prompt from en.json. Do not change the _meta.prompt of this file."
+    },
+    "dev.hai-vr.constraint-tools": {
+        "phrases": {
+            "activate_with_skinned_offsets": "スキン済みオフセットで有効化",
+            "apply_skinned_mesh_constraint": "Skinned Mesh Constraint を適用",
+            "bind_method": "バインド方法",
+            "create_parent_constraint": "Parent Constraintを作成",
+            "msg_builder_can_be_removed": "完了した場合、この Skinned Mesh Constraint Builder は削除できます。",
+            "msg_not_enough_bones": "このConstraintにはボーンが1つしかありません。代わりにそのボーンへ親子付けするか、ボーンプロキシを使用してください。",
+            "remove_skinned_mesh_constraint_builder": "Skinned Mesh Constraint Builder を削除",
+            "sampler_offset": "サンプラーオフセット",
+            "source_mesh": "ソースメッシュ",
+            "update_offset": "Skinned Mesh Constraint のオフセットを更新",
+            "update_parent_constraint": "Parent Constraintを更新",
+            "vendor": "ベンダー"
+        },
+        "enums": {
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintVendor": {
+                "Default": "デフォルト",
+                "Unity": "Unity",
+                "Specific": "指定"
+            },
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintBindMethod": {
+                "ClosestFace": "最も近い面",
+                "ClosestVertex": "最も近い頂点"
+            }
+        }
+    }
+}

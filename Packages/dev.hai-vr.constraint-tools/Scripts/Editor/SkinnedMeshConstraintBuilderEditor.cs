@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Hai.ConstraintTools.Runtime;
+using HVR.EF.Loc;
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
@@ -18,17 +19,18 @@ namespace Hai.ConstraintTools.Editor
     [CustomEditor(typeof(SkinnedMeshConstraintBuilder))]
     public class SkinnedMeshConstraintBuilderEditor : UnityEditor.Editor
     {
-        private const string CreateParentConstraintLabel = "Create Parent Constraint";
-        private const string UpdateParentConstraintLabel = "Update Parent Constraint";
-        private const string MsgBuilderCanBeRemoved = "If you're finished, you can remove this Skinned Mesh Constraint Builder.";
-        private const string RemoveSkinnedMeshConstraintBuilderLabel = "Remove Skinned Mesh Constraint Builder";
-        private const string SamplerOffsetLabel = "Sampler Offset";
-        private const string UpdateOffsetLabel = "Update Skinned Mesh Constraint offset";
-        private const string MsgNotEnoughBones = "This constraint only has one bone. You should parent to that bone instead, or use a bone proxy.";
-        private const string ApplySkinnedMeshConstraintLabel = "Apply Skinned Mesh Constraint";
-        private const string ActivateWithSkinnedOffsetsLabel = "Activate with Skinned Offsets";
-
         private const bool DrawMatch = true;
+
+        public static HaiEFLoc localize
+        {
+            get
+            {
+                _localize ??= NewLoc();
+                return _localize;
+            }
+        }
+        private static HaiEFLoc _localize;
+        private static HaiEFLoc NewLoc() => new("dev.hai-vr.constraint-tools", "Packages/dev.hai-vr.constraint-tools/Scripts/Editor/Locale");
 
         public static GUIStyle RedText;
         public static GUIStyle BlueText;
@@ -42,6 +44,8 @@ namespace Hai.ConstraintTools.Editor
 
         public override void OnInspectorGUI()
         {
+            localize.RefreshIfNecessary();
+            
             var my = (SkinnedMeshConstraintBuilder)target;
             var smc = my;
             Component parentConstraintNullable = smc.GetComponent<ParentConstraint>();
@@ -50,12 +54,12 @@ namespace Hai.ConstraintTools.Editor
             if (parentConstraintNullable == null) parentConstraintNullable = smc.GetComponent<VRCParentConstraint>();
 #endif
             
-            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.sourceMesh)));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.bindMethod)));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.samplerOffset)));
+            localize.PropertyField(Phrases.source_mesh, serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.sourceMesh)));
+            localize.EnumPropertyField<SkinnedMeshConstraintBuilder.SkinnedMeshConstraintBindMethod>(Phrases.bind_method, serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.bindMethod)));
+            localize.PropertyField(Phrases.sampler_offset, serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.samplerOffset)));
             
             EditorGUI.BeginDisabledGroup(my.sourceMesh == null);
-            if (GUILayout.Button(parentConstraintNullable == null ? CreateParentConstraintLabel : UpdateParentConstraintLabel))
+            if (localize.Button(parentConstraintNullable == null ? Phrases.create_parent_constraint : Phrases.update_parent_constraint))
             {
                 if (parentConstraintNullable == null)
                 {
@@ -81,17 +85,17 @@ namespace Hai.ConstraintTools.Editor
             
             if (parentConstraintNullable == null)
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.vendor)));
+                localize.EnumPropertyField<SkinnedMeshConstraintBuilder.SkinnedMeshConstraintVendor>(Phrases.vendor, serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.vendor)));
             }
             else
             {
                 if (!HasMultipleSources(parentConstraintNullable))
                 {
-                    EditorGUILayout.HelpBox(MsgNotEnoughBones, MessageType.Error);
+                    localize.HelpBox(Phrases.msg_not_enough_bones, MessageType.Error);
                 }
                 
-                EditorGUILayout.HelpBox(MsgBuilderCanBeRemoved, MessageType.Info);
-                if (GUILayout.Button(RemoveSkinnedMeshConstraintBuilderLabel))
+                localize.HelpBox(Phrases.msg_builder_can_be_removed, MessageType.Info);
+                if (localize.Button(Phrases.remove_skinned_mesh_constraint_builder))
                 {
                     Undo.DestroyObjectImmediate(my);
                 }
@@ -102,6 +106,8 @@ namespace Hai.ConstraintTools.Editor
             {
                 serializedObject.ApplyModifiedProperties();
             }
+
+            localize.Selector(() => _localize = NewLoc());
         }
 
         private bool HasMultipleSources(Component parentConstraintNullable)
@@ -132,7 +138,7 @@ namespace Hai.ConstraintTools.Editor
                 var newValue = Handles.PositionHandle(worldOffset, Quaternion.identity);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    Undo.RecordObject(my, UpdateOffsetLabel);
+                    Undo.RecordObject(my, localize.Text(Phrases.update_offset));
                     my.samplerOffset = my.transform.InverseTransformPoint(newValue);
                 }
             }
@@ -151,7 +157,7 @@ namespace Hai.ConstraintTools.Editor
             {
                 Gizmos.color = Color.red;
                 var worldOffset = my.transform.TransformPoint(my.samplerOffset);
-                Handles.Label(worldOffset, SamplerOffsetLabel, RedText);
+                Handles.Label(worldOffset, Phrases.sampler_offset, RedText);
                 Gizmos.DrawWireSphere(worldOffset, 0.001f);
                 
                 Handles.color = Color.red;
@@ -239,7 +245,7 @@ namespace Hai.ConstraintTools.Editor
             var referenceTransform = constraint.transform;
             if (constraint is ParentConstraint unityConstraint)
             {
-                Undo.RecordObject(unityConstraint, ApplySkinnedMeshConstraintLabel);
+                Undo.RecordObject(unityConstraint, localize.Text(Phrases.apply_skinned_mesh_constraint));
                 unityConstraint.constraintActive = false;
                 unityConstraint.locked = false;
                 while (unityConstraint.sourceCount > 0)
@@ -282,7 +288,7 @@ namespace Hai.ConstraintTools.Editor
 #if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
             else if (constraint is VRCParentConstraint vrcConstraint)
             {
-                Undo.RecordObject(vrcConstraint, ApplySkinnedMeshConstraintLabel);
+                Undo.RecordObject(vrcConstraint, localize.Text(Phrases.apply_skinned_mesh_constraint));
                 vrcConstraint.IsActive = false;
                 vrcConstraint.Locked = false;
                 vrcConstraint.Sources.SetLength(boneToWeight.Count);
@@ -585,7 +591,7 @@ namespace Hai.ConstraintTools.Editor
 
             var referenceTransform = unityConstraint.transform;
             
-            Undo.RecordObject(unityConstraint, ActivateWithSkinnedOffsetsLabel);
+            Undo.RecordObject(unityConstraint, localize.Text(Phrases.activate_with_skinned_offsets));
             unityConstraint.constraintActive = false;
             unityConstraint.locked = false;
             
@@ -612,7 +618,7 @@ namespace Hai.ConstraintTools.Editor
 
             var referenceTransform = vrcConstraint.transform;
             
-            Undo.RecordObject(vrcConstraint, ActivateWithSkinnedOffsetsLabel);
+            Undo.RecordObject(vrcConstraint, localize.Text(Phrases.activate_with_skinned_offsets));
             vrcConstraint.IsActive = false;
             vrcConstraint.Locked = false;
 

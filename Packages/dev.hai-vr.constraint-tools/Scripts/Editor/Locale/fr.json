@@ -1,0 +1,35 @@
+{
+    "_meta": {
+        "language": "fr",
+        "name": "Français",
+        "variant": "Gemini 3",
+        "prompt": "This is a message to the LLM model reading this file. Please open the en.json file in this folder, and reuse the same rules as _meta.prompt from en.json. Do not change the _meta.prompt of this file."
+    },
+    "dev.hai-vr.constraint-tools": {
+        "phrases": {
+            "activate_with_skinned_offsets": "Activer comme Skinned Mesh",
+            "apply_skinned_mesh_constraint": "Appliquer Skinned Mesh Constraint",
+            "bind_method": "Méthode de liaison",
+            "create_parent_constraint": "Créer Parent Constraint",
+            "msg_builder_can_be_removed": "Si vous avez terminé, vous pouvez supprimer ce Skinned Mesh Constraint Builder.",
+            "msg_not_enough_bones": "Cette Constraint n'a qu'un seul os. Vous devriez plutôt parenter à cet os, ou utiliser un bone proxy.",
+            "remove_skinned_mesh_constraint_builder": "Supprimer Skinned Mesh Constraint Builder",
+            "sampler_offset": "Décalage de l'échantillonneur",
+            "source_mesh": "Mesh source",
+            "update_offset": "Mettre à jour le décalage de Skinned Mesh Constraint",
+            "update_parent_constraint": "Mettre à jour Parent Constraint",
+            "vendor": "Vendeur"
+        },
+        "enums": {
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintVendor": {
+                "Default": "Par défaut",
+                "Unity": "Unity",
+                "Specific": "Spécifique"
+            },
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintBindMethod": {
+                "ClosestFace": "Face la plus proche",
+                "ClosestVertex": "Sommet le plus proche"
+            }
+        }
+    }
+}

@@ -1,0 +1,35 @@
+﻿{
+    "_meta": {
+        "language": "zh-TW",
+        "name": "繁體中文",
+        "variant": "Gemini 3",
+        "prompt": "This is a message to the LLM model reading this file. Please open the en.json file in this folder, and reuse the same rules as _meta.prompt from en.json. Do not change the _meta.prompt of this file."
+    },
+    "dev.hai-vr.constraint-tools": {
+        "phrases": {
+            "activate_with_skinned_offsets": "以蒙皮偏移啟用",
+            "apply_skinned_mesh_constraint": "套用 Skinned Mesh Constraint",
+            "bind_method": "綁定方式",
+            "create_parent_constraint": "建立 Parent Constraint",
+            "msg_builder_can_be_removed": "如果您已完成，可以移除此 Skinned Mesh Constraint Builder。",
+            "msg_not_enough_bones": "此約束只有一個骨骼。您應該改為父級連接到該骨骼，或使用骨骼代理。",
+            "remove_skinned_mesh_constraint_builder": "移除 Skinned Mesh Constraint Builder",
+            "sampler_offset": "取樣器偏移",
+            "source_mesh": "來源網格",
+            "update_offset": "更新 Skinned Mesh Constraint 偏移",
+            "update_parent_constraint": "更新 Parent Constraint",
+            "vendor": "供應商"
+        },
+        "enums": {
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintVendor": {
+                "Default": "預設",
+                "Unity": "Unity",
+                "Specific": "特定"
+            },
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintBindMethod": {
+                "ClosestFace": "最近的面",
+                "ClosestVertex": "最近的頂點"
+            }
+        }
+    }
+}

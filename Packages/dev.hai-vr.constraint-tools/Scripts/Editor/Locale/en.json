@@ -1,0 +1,35 @@
+﻿{
+    "_meta": {
+        "language": "en",
+        "name": "English",
+        "variant": "",
+        "prompt": "When requested to translate a localization file, follow the rules in this prompt. _meta.prompt must not be changed. _meta.name must be in the requested language, not English. For example, it should be 日本語 in the Japanese language. _meta.variant must be the model used, for example GPT-5 or Gemini 3; of course, substitute with the LLM model in use. The words Unity, Skinned Mesh Constraint, Skinned Mesh Constraint Builder, Parent Constraint, and Constraint are technical terms so they must remain in English. The two words Skinned Offsets should be translated."
+    },
+    "dev.hai-vr.constraint-tools": {
+        "phrases": {
+            "activate_with_skinned_offsets": "Activate with Skinned Offsets",
+            "apply_skinned_mesh_constraint": "Apply Skinned Mesh Constraint",
+            "bind_method": "Bind Method",
+            "create_parent_constraint": "Create Parent Constraint",
+            "msg_builder_can_be_removed": "If you're finished, you can remove this Skinned Mesh Constraint Builder.",
+            "msg_not_enough_bones": "This constraint only has one bone. You should parent to that bone instead, or use a bone proxy.",
+            "remove_skinned_mesh_constraint_builder": "Remove Skinned Mesh Constraint Builder",
+            "sampler_offset": "Sampler Offset",
+            "source_mesh": "Source Mesh",
+            "update_offset": "Update Skinned Mesh Constraint offset",
+            "update_parent_constraint": "Update Parent Constraint",
+            "vendor": "Vendor"
+        },
+        "enums": {
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintVendor": {
+                "Default": "Default",
+                "Unity": "Unity",
+                "Specific": "Specific"
+            },
+            "Hai.ConstraintTools.Runtime.SkinnedMeshConstraintBuilder+SkinnedMeshConstraintBindMethod": {
+                "ClosestFace": "Closest Face",
+                "ClosestVertex": "Closest Vertex"
+            }
+        }
+    }
+}
