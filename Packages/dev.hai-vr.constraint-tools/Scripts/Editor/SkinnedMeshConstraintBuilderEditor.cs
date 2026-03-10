@@ -157,7 +157,7 @@ namespace Hai.ConstraintTools.Editor
             {
                 Gizmos.color = Color.red;
                 var worldOffset = my.transform.TransformPoint(my.samplerOffset);
-                Handles.Label(worldOffset, Phrases.sampler_offset, RedText);
+                Handles.Label(worldOffset, localize.Text(Phrases.sampler_offset), RedText);
                 Gizmos.DrawWireSphere(worldOffset, 0.001f);
                 
                 Handles.color = Color.red;
