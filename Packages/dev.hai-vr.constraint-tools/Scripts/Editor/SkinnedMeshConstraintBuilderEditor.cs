@@ -13,6 +13,9 @@ using System.Reflection;
 using VRC.Dynamics;
 using VRC.SDK3.Dynamics.Constraint.Components;
 #endif
+#if CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+using Basis.Scripts.BasisSdk.Constraints;
+#endif
 
 namespace Hai.ConstraintTools.Editor
 {
@@ -52,6 +55,8 @@ namespace Hai.ConstraintTools.Editor
 #if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
             // Note: Requires VRC.Dynamics.dll to resolve that VRCParentConstraint is a MonoBehaviour
             if (parentConstraintNullable == null) parentConstraintNullable = smc.GetComponent<VRCParentConstraint>();
+#elif CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+            if (parentConstraintNullable == null) parentConstraintNullable = smc.GetComponent<BasisParentConstraint>();
 #endif
             
             localize.PropertyField(Phrases.source_mesh, serializedObject.FindProperty(nameof(SkinnedMeshConstraintBuilder.sourceMesh)));
@@ -72,6 +77,15 @@ namespace Hai.ConstraintTools.Editor
                     else
                     {
                         parentConstraintNullable = Undo.AddComponent<VRCParentConstraint>(my.gameObject);
+                    }
+#elif CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+                    if (my.vendor == SkinnedMeshConstraintBuilder.SkinnedMeshConstraintVendor.Unity)
+                    {
+                        parentConstraintNullable = Undo.AddComponent<ParentConstraint>(my.gameObject);
+                    }
+                    else
+                    {
+                        parentConstraintNullable = Undo.AddComponent<BasisParentConstraint>(my.gameObject);
                     }
 #else
                     parentConstraintNullable = Undo.AddComponent<ParentConstraint>(my.gameObject);
@@ -121,6 +135,11 @@ namespace Hai.ConstraintTools.Editor
             {
                 return vrcConstraint.Sources.Count > 1;
             }
+#elif CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+            else if (parentConstraintNullable is BasisParentConstraint basisConstraint)
+            {
+                return basisConstraint.Sources.Count > 1;
+            }
 #endif
 
             return true;
@@ -167,6 +186,8 @@ namespace Hai.ConstraintTools.Editor
             Component parentConstraint = my.GetComponent<ParentConstraint>();
 #if CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_SUPPORTED
             if (parentConstraint == null) parentConstraint = my.GetComponent<VRCParentConstraint>();
+#elif CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+            if (parentConstraint == null) parentConstraint = my.GetComponent<BasisParentConstraint>();
 #endif
             if (parentConstraint == null) return;
 
@@ -200,6 +221,19 @@ namespace Hai.ConstraintTools.Editor
                         var offset = source.ParentPositionOffset;
 #endif
                         DrawFor(my.transform.position, source.SourceTransform.TransformPoint(offset), source.SourceTransform, source.Weight);
+                    }
+                }
+            }
+#elif CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+            else if (parentConstraint is BasisParentConstraint basisConstraint)
+            {
+                for (var index = 0; index < basisConstraint.translationOffsets.Length; index++)
+                {
+                    var constraintSource = basisConstraint.GetSource(index);
+                    if (constraintSource.sourceTransform != null)
+                    {
+                        var offset = basisConstraint.translationOffsets[index];
+                        DrawFor(my.transform.position, constraintSource.sourceTransform.TransformPoint(offset), constraintSource.sourceTransform, constraintSource.weight);
                     }
                 }
             }
@@ -322,6 +356,41 @@ namespace Hai.ConstraintTools.Editor
                 vrcConstraint.Locked = true;
                 vrcConstraint.IsActive = true;
             }
+#elif CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+            else if (constraint is BasisParentConstraint basisConstraint)
+            {
+                Undo.RecordObject(basisConstraint, localize.Text(Phrases.apply_skinned_mesh_constraint));
+                basisConstraint.constraintActive = false;
+                basisConstraint.locked = false;
+                while (basisConstraint.sourceCount > 0)
+                    basisConstraint.RemoveSource(0);
+
+                foreach (var boneIndexToWeight in boneToWeight)
+                {
+                    var sourceTransform = bones[boneIndexToWeight.Key];
+                    if (sourceTransform != null)
+                    {
+                        basisConstraint.AddSource(new BasisConstraintSourceEntry
+                        {
+                            weight = boneIndexToWeight.Value / summedWeights,
+                            sourceTransform = sourceTransform
+                        });
+                    }
+                }
+
+                // For the same reason as Unity Parent Constraint, read the long comment on the block above
+                // about why the Activate button should not be used here.
+                // For more information, please read: https://docs.hai-vr.dev/docs/research/other/constraint-activate
+                var sources = new List<BasisConstraintSourceEntry>();
+                basisConstraint.GetSources(sources);
+                basisConstraint.translationOffsets = BasisTranslationOffsets(sources, referenceTransform);
+                basisConstraint.rotationOffsets = BasisRotationOffsets(sources, referenceTransform);
+
+                basisConstraint.translationAtRest = my.transform.localPosition;
+                basisConstraint.rotationAtRest = my.transform.localRotation.eulerAngles;
+                basisConstraint.locked = true;
+                basisConstraint.constraintActive = true;
+            }
 #endif
 
             Object.DestroyImmediate(bakeMesh);
@@ -340,6 +409,22 @@ namespace Hai.ConstraintTools.Editor
                 .Select(source => source.sourceTransform == null ? Quaternion.identity.eulerAngles : (Quaternion.Inverse(source.sourceTransform.rotation) * referenceTransform.rotation).eulerAngles)
                 .ToArray();
         }
+
+#if CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+        private static Vector3[] BasisTranslationOffsets(List<BasisConstraintSourceEntry> sources, Transform referenceTransform)
+        {
+            return sources
+                .Select(source => source.sourceTransform == null ? Vector3.zero : CalculateTranslationOffset(source.sourceTransform, referenceTransform))
+                .ToArray();
+        }
+
+        private static Vector3[] BasisRotationOffsets(List<BasisConstraintSourceEntry> sources, Transform referenceTransform)
+        {
+            return sources
+                .Select(source => source.sourceTransform == null ? Quaternion.identity.eulerAngles : (Quaternion.Inverse(source.sourceTransform.rotation) * referenceTransform.rotation).eulerAngles)
+                .ToArray();
+        }
+#endif
 
         private static Vector3 CalculateTranslationOffset(Transform sourceTransform, Transform referenceTransform)
         {
@@ -635,6 +720,37 @@ namespace Hai.ConstraintTools.Editor
             
             vrcConstraint.Locked = true;
             vrcConstraint.IsActive = true;
+        }
+#endif
+        
+#if CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED
+
+        [MenuItem("CONTEXT/BasisParentConstraint/Haï Activate with Skinned Offsets")]
+        public static void SkinBasisParentConstraint(MenuCommand command)
+        {
+            var basisConstraint = (BasisParentConstraint)command.context;
+            
+            var sources = new List<BasisConstraintSourceEntry>();
+            basisConstraint.GetSources(sources);
+            if (sources.Any(source => source.sourceTransform == null))
+            {
+                return;
+            }
+
+            var referenceTransform = basisConstraint.transform;
+            
+            Undo.RecordObject(basisConstraint, localize.Text(Phrases.activate_with_skinned_offsets));
+            basisConstraint.constraintActive = false;
+            basisConstraint.locked = false;
+            
+            basisConstraint.translationOffsets = BasisTranslationOffsets(sources, referenceTransform);
+            basisConstraint.rotationOffsets = BasisRotationOffsets(sources, referenceTransform);
+            
+            basisConstraint.translationAtRest = referenceTransform.localPosition;
+            basisConstraint.rotationAtRest = referenceTransform.localRotation.eulerAngles;
+            
+            basisConstraint.locked = true;
+            basisConstraint.constraintActive = true;
         }
 #endif
     }

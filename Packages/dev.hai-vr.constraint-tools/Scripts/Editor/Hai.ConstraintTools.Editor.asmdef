@@ -4,7 +4,8 @@
     "references": [
         "Hai.ConstraintTools.Runtime",
         "VRC.SDK3A",
-        "VRC.SDK3A.Editor"
+        "VRC.SDK3A.Editor",
+        "BasisSDK"
     ],
     "includePlatforms": [
         "Editor"
@@ -35,6 +36,11 @@
             "name": "com.vrchat.avatars",
             "expression": "3.10.0",
             "define": "CONSTRAINTTOOLS_VRCHAT_CONSTRAINTS_IS_SDK_3_10_0_OR_NEWER"
+        },
+        {
+            "name": "com.basis.sdk",
+            "expression": "0.0.1",
+            "define": "CONSTRAINTTOOLS_BASIS_CONSTRAINTS_SUPPORTED"
         }
     ],
     "noEngineReferences": false
